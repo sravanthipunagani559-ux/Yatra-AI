@@ -1,4 +1,6 @@
 from contextlib import asynccontextmanager
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -11,18 +13,27 @@ from routes import trips, discovery, budget, safety, business, admin, users
 async def lifespan(app: FastAPI):
     # Startup: initialize database connection and data
     await database.init_db()
+
     yield
+
     # Shutdown logic if needed
 
 
 app = FastAPI(
     title="YatraAI API",
-    description="Smart tourism platform API for itinerary generation, adaptive replanning, discovery, safety, and local business empowerment.",
+    description=(
+        "Smart tourism platform API for itinerary generation, "
+        "adaptive replanning, discovery, safety, and local business empowerment."
+    ),
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
-# Configure CORS
+
+# --------------------------------------------------
+# CORS CONFIGURATION
+# --------------------------------------------------
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -31,25 +42,35 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Root endpoint
+
+# --------------------------------------------------
+# ROOT ENDPOINT
+# --------------------------------------------------
+
 @app.get("/")
 def read_root():
     return {
         "message": "YatraAI API is running",
-        "status": "success"
+        "status": "success",
     }
 
 
-# Health check endpoint
+# --------------------------------------------------
+# HEALTH CHECK
+# --------------------------------------------------
+
 @app.get("/api/health")
 def health_check():
     return {
         "status": "healthy",
-        "service": "YatraAI Backend"
+        "service": "YatraAI Backend",
     }
 
 
-# Include Routers with /api prefix
+# --------------------------------------------------
+# API ROUTES
+# --------------------------------------------------
+
 app.include_router(trips.router, prefix="/api")
 app.include_router(discovery.router, prefix="/api")
 app.include_router(budget.router, prefix="/api")
@@ -59,6 +80,15 @@ app.include_router(admin.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
 
 
+# --------------------------------------------------
+# LOCAL DEVELOPMENT / RENDER STARTUP
+# --------------------------------------------------
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 8000)),
+    )
