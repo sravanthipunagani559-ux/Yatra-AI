@@ -13,7 +13,14 @@ import MyDayPlan from './MyDayPlan.jsx'
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [route, setRoute] = useState(window.location.pathname)
+  const [route, setRoute] = useState(() => {
+    const redirect = new URLSearchParams(window.location.search).get('redirect')
+    if (redirect) {
+      window.history.replaceState(null, '', redirect)
+      return redirect
+    }
+    return window.location.pathname
+  })
   const [tripData, setTripData] = useState(null)
   const [dayPlan, setDayPlan] = useState(() => {
     try { return JSON.parse(window.localStorage.getItem('yatraai-day-plan')) }

@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8"><title>Opening YatraAI…</title></head>
+  <body>
+    <script>
+      const appBase = '/Yatra-AI';
+      const route = location.pathname.startsWith(appBase)
+        ? location.pathname.slice(appBase.length) || '/'
+        : location.pathname;
+      location.replace(`${appBase}/?redirect=${encodeURIComponent(route + location.search + location.hash)}`);
+    </script>
+  </body>
+</html>
